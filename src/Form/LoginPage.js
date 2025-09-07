@@ -1,4 +1,4 @@
-import { Mail, Lock, Home, Menu, X } from "lucide-react";
+import { Mail, Lock, Home, Menu, X, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -10,14 +10,15 @@ import logo2 from './image/Symbol.svg (2).png'
 import logo3 from './image/Symbol.svg.png'
 import imagebuy from './image/Rectangle 1 (2).png'
 
+
 export default function LoginPage() {
 
   const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false); // ✅ loading state
     const navigate = useNavigate();
-     const [menuOpen, setMenuOpen] = useState(false);
-  
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const handleSubmit = async (e) => {
       e.preventDefault();
       setLoading(true); // start loading
@@ -124,19 +125,32 @@ export default function LoginPage() {
 
               {/* Password */}
               <div>
-                <label className="block text-sm font-medium text-black">
-                  Password
-                </label>
-                <div className="relative mt-1">
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter Your Password"
-                    className="w-full border text-black rounded-lg px-4 py-3 pl-3 border-blue-900 shadow-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
-                  />
-                  <Lock className="absolute right-3 top-3 w-5 h-5 text-gray-400" />
-                </div>
+      <label className="block text-sm font-medium text-black">
+        Password
+      </label>
+      <div className="relative mt-1">
+        <input
+          type={showPassword ? "text" : "password"}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Enter Your Password"
+          className="w-full border text-black rounded-lg px-4 py-3 pl-3 border-blue-900 shadow-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+        />
+        
+        {/* Toggle Button (right) */}
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute right-3 top-3 text-gray-500 focus:outline-none"
+        >
+          {showPassword ? (
+            <EyeOff className="w-5 h-5" />
+          ) : (
+            <Eye className="w-5 h-5" />
+          )}
+        </button>
+      </div>
+    
                 <div className="flex justify-between items-center text-xs mt-2">
                   <label className="flex items-center gap-2">
                     <input type="checkbox" className="w-4 h-4" /> Remember Me

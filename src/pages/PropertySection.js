@@ -50,7 +50,7 @@ export default function PropertySection() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 hover:shadow-xl gap-4">
           {Array.from({ length: Math.ceil(visibleFeatured / 4) }).map(
             (_, groupIndex) => {
               const group = featured.slice(groupIndex * 4, groupIndex * 4 + 4);
@@ -134,7 +134,7 @@ export default function PropertySection() {
             </button>
           )}
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 hover:shadow-xl gap-4">
           {forSale.slice(0, visibleForSale).map((item, index) => (
             <div
               key={item.id}
@@ -196,7 +196,7 @@ export default function PropertySection() {
             </button>
           )}
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 hover:shadow-xl gap-4">
           {forRent.slice(0, visibleRent).map((item, index) => (
             <div
               key={item.id}

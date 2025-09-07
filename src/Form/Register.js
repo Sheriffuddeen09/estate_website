@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Mail, Lock, Home, Menu, X } from "lucide-react";
+import { Home, Menu, X, Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth, db } from "../services/firebase"; // ✅ make sure firebase.js exports auth & db
+import { auth, db } from "../services/firebase"; 
 import { setDoc, doc } from "firebase/firestore";
 import { toast } from "react-toastify";
 import imagebuy from "./image/Rectangle 1 (2).png";
@@ -15,6 +15,11 @@ export default function RegisterPage() {
   const [lname, setLname] = useState("");
   const [loading, setLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // 👁️ New states for password visibility
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
@@ -43,12 +48,10 @@ export default function RegisterPage() {
         position: "top-center",
       });
 
-      navigate("/login"); // ✅ redirect to login page
+      navigate("/login"); 
     } catch (error) {
       console.log(error.message);
-      toast.error(error.message, {
-        position: "bottom-center",
-      });
+      toast.error(error.message, { position: "bottom-center" });
     } finally {
       setLoading(false);
     }
@@ -112,7 +115,7 @@ export default function RegisterPage() {
     </header>
 
       {/* Main Content */}
-      <div className="flex flex-1 flex-col md:flex-row">
+    <div className="flex flex-1 flex-col md:flex-row">
         {/* Left Section - Form */}
         <div className="flex-1 flex flex-col my-10 justify-center px-8 md:px-16 lg:px-24">
           <div className="max-w-md w-full space-y-6">
@@ -166,34 +169,60 @@ export default function RegisterPage() {
                 />
               </div>
 
-              {/* Password */}
+              {/* Password with toggle */}
               <div>
                 <label className="block text-sm font-medium text-black">
                   Password
                 </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter Your Password"
-                  required
-                  className="w-full border rounded-lg px-4 py-3 text-black  border-blue-900 shadow-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter Your Password"
+                    required
+                    className="w-full border rounded-lg px-4 py-3 text-black border-blue-900 shadow-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-3 text-gray-500"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
               </div>
 
-              {/* Confirm Password */}
+              {/* Confirm Password with toggle */}
               <div>
                 <label className="block text-sm font-medium text-black">
                   Confirm Password
                 </label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm Your Password"
-                  required
-                  className="w-full border rounded-lg px-4 text-black py-3 border-blue-900 shadow-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
-                />
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm Your Password"
+                    required
+                    className="w-full border rounded-lg px-4 py-3 text-black border-blue-900 shadow-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-3 text-gray-500"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
               </div>
 
               {/* Register Button */}
@@ -228,14 +257,6 @@ export default function RegisterPage() {
                 )}
               </button>
             </form>
-
-            {/* Redirect to Login */}
-            <p className="text-center text-sm text-gray-600">
-              Already have an account?{" "}
-              <Link to="/login" className="text-blue-900 font-semibold">
-                Log In
-              </Link>
-            </p>
           </div>
         </div>
 
@@ -248,6 +269,7 @@ export default function RegisterPage() {
           />
         </div>
       </div>
+  
     </div>
   );
 }

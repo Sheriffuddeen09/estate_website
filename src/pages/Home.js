@@ -194,7 +194,7 @@ export default function HomePage() {
           ].map((item, i) => (
             <div
               key={i}
-              className="bg-gray-100 rounded-2xl shadow-md p-6 hover:shadow-xl transition"
+              className="bg-gray-100 rounded-2xl shadow-md p-6 hover:shadow-xl hover:scale-105 transition"
               data-aos="fade-up"
               data-aos-delay={i * 200}
             >

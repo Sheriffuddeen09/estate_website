@@ -66,7 +66,7 @@ export default function PropertySection() {
         </div>
 
         {/* Grid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 hover:shadow-xl gap-6">
           {filteredProperties.slice(0, visible).map((item, index) => (
             <div
               key={item.id}
