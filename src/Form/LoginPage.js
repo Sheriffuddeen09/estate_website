@@ -1,4 +1,4 @@
-import { Mail, Lock, Home, Menu, X, Eye, EyeOff } from "lucide-react";
+import { Mail, Home, Menu, X, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -155,9 +155,9 @@ export default function LoginPage() {
                   <label className="flex items-center gap-2">
                     <input type="checkbox" className="w-4 h-4" /> Remember Me
                   </label>
-                  <a href="#" className="text-red-500 hover:underline">
+                  <Link to={'/forget_password'} className="text-red-500 hover:underline">
                     Forgot Password?
-                  </a>
+                  </Link>
                 </div>
               </div>
 
