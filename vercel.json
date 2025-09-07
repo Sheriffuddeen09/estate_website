@@ -1,0 +1,15 @@
+{
+    "build": [
+        {
+            "src": "package.json",
+            "use": "@vercel/node"
+        }
+    ],
+    "engines": {
+        "node": "18.x",
+        "typescript": "5.x"
+    },
+    "env": {
+        "NODE_OPTION": "--openssl-legacy-provider"
+    }
+}
