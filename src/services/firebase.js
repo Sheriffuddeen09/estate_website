@@ -7,9 +7,6 @@ import {getFirestore} from "firebase/firestore";
 
 // Your web app's Firebase configuration
 // firebase.js
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth"; // Example: Firebase Auth
-import { getFirestore } from "firebase/firestore"; // Example: Firestore
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
