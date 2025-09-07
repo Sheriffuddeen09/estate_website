@@ -27,7 +27,7 @@ function App() {
         <LoginPage />
     } />
 
-      {/* Home */}
+      {/* Home Page*/}
       <Route path="/" element={
           <HomePage />
       } />
@@ -41,7 +41,6 @@ function App() {
 
       </Routes>
         <ToastContainer />
-
     </div>
   );
 }
