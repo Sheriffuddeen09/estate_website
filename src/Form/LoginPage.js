@@ -1,184 +1,236 @@
-import {useEffect, useRef, useState } from "react"
-import { Link, useNavigate} from "react-router-dom"
-import { Api } from "../api/axios"
-import Google from "./Google"
-import Facebook from "./Facebook"
-import Apple from "./Apple"
+import { Mail, Lock, Home, Menu, X } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useState } from "react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../services/firebase";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import logo1 from './image/Symbol.svg (1).png'
+import logo2 from './image/Symbol.svg (2).png'
+import logo3 from './image/Symbol.svg.png'
+import imagebuy from './image/Rectangle 1 (2).png'
 
+export default function LoginPage() {
 
-const LoginPage = () =>{
-    const userRef = useRef()
-    const [password, setPassword] = useState('')
-    const [email, setEmail] = useState('')
-    const [errMsg, setErrMsg] = useState('')
-    const [loading, setLoading] = useState(false)
-    const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false); // ✅ loading state
+    const navigate = useNavigate();
+     const [menuOpen, setMenuOpen] = useState(false);
+  
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      setLoading(true); // start loading
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        toast.success("User logged in Successfully", {
+          position: "top-center",
+        });
+        navigate("/"); // ✅ redirect to homepage
+      } catch (error) {
+        console.log(error.message);
+        toast.error(error.message, {
+          position: "bottom-center",
+        });
+      } finally {
+        setLoading(false); // stop loading
+      }
+    };
 
-    const navigate = useNavigate()
+  return (
+    <div className="min-h-screen flex flex-col bg-white">
+      {/* Top Navigation */}
+      <header className="flex justify-between items-center shadow-md py-6 px-8 md:px-16 lg:px-24 border-b relative">
+      {/* Left - Homepage */}
+      <Link
+        to="/"
+        className="hidden md:flex items-center gap-2 text-gray-600 border border-blue-600 px-4 py-2 rounded-full text-sm hover:bg-gray-100 transition"
+      >
+        ← Homepage
+      </Link>
 
-    useEffect(() => {
-        userRef.current.focus()
+      {/* Center Logo */}
+      <p className="font-bold text-black flex items-center gap-3">
+        <Home /> PropBot
+      </p>
 
-    }, [])
+      {/* Right - About Us (desktop) */}
+      <Link
+        to="/about"
+        className="hidden md:block bg-blue-900 text-white px-5 py-2 rounded-full text-sm hover:bg-blue-700 transition"
+      >
+        About Us →
+      </Link>
 
-   
-   const handleSubmit = async (e) =>{
-    e.preventDefault()
-    console.log(email, password)
-    setLoading(true)
-    try{
-        const response = await Api.post("/login.php",
-            JSON.stringify({email, password}),
-           { headers:{ 'Content-Type': 'application/json'}, 
-           withCredentials: true
-        }
-       
-        )
-        
-        if(response.data.success){
+      {/* Mobile Menu Button */}
+      <button
+        className="md:hidden text-black"
+        onClick={() => setMenuOpen(!menuOpen)}
+      >
+        {menuOpen ? <X size={28} className="hidden" /> : <Menu size={28} />}
+      </button>
 
-            const user = response.data.user
+      {/* Mobile Menu Overlay */}
+      {menuOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-90 flex justify-center items-center z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-64  space-y-6 text-center">
+            <X size={28} className="text-black" onClick={() => setMenuOpen(!menuOpen)} />
+            <Link
+              to="/"
+              onClick={() => setMenuOpen(false)}
+              className="block text-gray-700 font-semibold  border border-blue-600 px-4 py-2 rounded-full hover:bg-gray-100 transition"
+            >
+              ← Homepage
+            </Link>
+            <Link
+              to="/about"
+              onClick={() => setMenuOpen(false)}
+              className="block bg-blue-900 text-white px-5 py-2 rounded-full font-semibold hover:bg-blue-700 transition"
+            >
+              About Us →
+            </Link>
+          </div>
+        </div>
+      )}
+    </header>
 
-            console.log("Login successful", user);
+      {/* Main Content - Login + Image */}
+      <div className="flex flex-1 flex-col md:flex-row">
+        {/* Left Section - Form */}
+        <div className="flex-1 flex flex-col justify-center px-8 md:px-16 lg:px-24">
+          {/* Logo */}
 
-            localStorage.setItem('user_id', user.id)
-            localStorage.setItem('user_firstname', user.firstname || "")
-            localStorage.setItem('user_lastname', user.lastname || "")
-            localStorage.setItem('user_email', user.email || "")
-            navigate("/dashboard"); // Redirect to profile page
-        } 
-        else {
-            setErrMsg(response.data.message);
-        }
+          {/* Login Form */}
+          <div className="max-w-md w-full space-y-6">
+            <h2 className="text-2xl text-black font-bold text-center">Log In</h2>
 
-        setEmail('')
-        setPassword('')
-
-    }
-    catch(err){
-        if(!err?.response){
-            setErrMsg('No server Response')
-        }
-        else if(err.response?.status === 401){
-            setErrMsg('Unauthorised')
-        }
-        else if(err.response?.status === 400){
-            setErrMsg('Missing Username or Password')
-        }
-        else{
-            setErrMsg('Login failed')
-        }
-    }
-    finally{
-    setLoading(false)
-
-    }
-   }
-
-    const content = (
-        <>
-        
-            <div className='flex flex-column justify-center mx-auto lg:my-3 my-3 rounded-xl border border-red-500 items-center bg-white sm:w-96 md:my-28 items-center p-10 w-72'>
-            <div className="">
-            
-            <form onSubmit={handleSubmit} >
-                <div className="sm:mb-5">
-                <h1 className="sm:text-3xl text-xl text-center text-green-400 font-serif"><span className="sm:text-2xl text-xl text-black mt-5 text-center font-bold font-roboto">Sign in</span></h1>
-                <div className="flex flex-col justify-center items-center mb-4">
-                    <Google  />
-                    <Facebook />
-                     <Apple />
-                     </div>
-                <div className=" mt-2 translate-x-3">
-                    <p className="text-sm font-roboto sm:text-sm font-bold -mb-5 text-black font-Cambria">
-                        Email Address:
-                    </p>
-                    <br />
-                    <input 
-                    className="border-2 border-red-400 w-64 sm:w-80 p-1 rounded-lg text-black outline-none"
-                    type="text"
-                    ref={userRef}
-                    required
-                    id="email"
-                    name="email"
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-medium text-black">
+                  Email Address
+                </label>
+                <div className="relative mt-1">
+                  <input
+                    type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    autoComplete="off"
-                    />
+                    placeholder="Enter Your Email Id"
+                    className="w-full border text-black rounded-lg px-4 py-3 pl-3 border-blue-900 shadow-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  />
+                  <Mail className="absolute right-3 top-3 w-5 h-5 text-gray-400" />
                 </div>
-                    <div className="translate-x-3">
-                    <p className="text-sm font-roboto font-bold mt-2 mb-1 text-black ">
-                        Password:
-                    </p>
-                    <div className="relative w-64 sm:w-80">
-                <input 
-                    className="border-2 border-red-400 w-full p-1 rounded-lg text-black outline-none pr-10" 
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    id="password"
-                    name="password"
+              </div>
+
+              {/* Password */}
+              <div>
+                <label className="block text-sm font-medium text-black">
+                  Password
+                </label>
+                <div className="relative mt-1">
+                  <input
+                    type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                />   
-                
-                <span
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
-                    onClick={() => setShowPassword(!showPassword)}
-                >
-                    {showPassword ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5 text-gray-600">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
-                    </svg>
-                    ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5 text-gray-600">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                    </svg>
-                    )}
-                </span>
+                    placeholder="Enter Your Password"
+                    className="w-full border text-black rounded-lg px-4 py-3 pl-3 border-blue-900 shadow-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  />
+                  <Lock className="absolute right-3 top-3 w-5 h-5 text-gray-400" />
                 </div>
+                <div className="flex justify-between items-center text-xs mt-2">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" className="w-4 h-4" /> Remember Me
+                  </label>
+                  <a href="#" className="text-red-500 hover:underline">
+                    Forgot Password?
+                  </a>
+                </div>
+              </div>
 
-                    </div>
-                </div>
-                
-                <button type="submit"  className="my-5 mx-auto translate-x-3 w-64 bg-red-500 text-white sm:w-80 p-2 rounded-lg outline-none"
-                     disabled={!email || !password}>
-                {loading ? "Sign in....." : "Sign in"}
-                </button>
+              {/* Login Button */}
+              <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-blue-900 text-white py-3 rounded-full font-semibold hover:bg-blue-700 transition flex justify-center items-center"
+      >
+        {loading ? (
+          <svg
+            className="animate-spin h-5 w-5 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            ></circle>
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+            ></path>
+          </svg>
+        ) : (
+          "Log In"
+        )}
+      </button>
             </form>
-            <p className={`text-red-600 mt-0 mb-8 text-center  ${errMsg ? 'errMsg' : 'hide'}`}>
-                {errMsg}
-            </p>
-            <div className="flex flex-row justify-center font-bold gap-1 -mt-5 mb-1 text-sm items-center">
-                No account?  <Link to={'register'} className="text-sm text-center text-red-500"> Create one</Link>
-                </div> 
-                <p style={{fontSize:'9px', textAlign:'center'}}>Click “Sign in” to agree to medium’s Terms of Service and acknowledg that medium’s Privacy Policy applies to you </p>
-                <Link to={'/reset'}><p className="text-sm text-center text-red-600 font-bold mt-3 mb-2">Forgot Password?</p></Link>
-                <div className="sm:w-80 w-60 bg-gray-200 h-0.5 mb-3 "></div>
-            <p className="text-sm text-center sm:block hidden"> Don’t have Pet Rent Hub account?
-                <span>
-                    <Link to="/register" className="text-red-500 text-sm"> Sign up now</Link>
-                </span>
-            </p>
-            <p className=" block sm:hidden" style={{
-                fontSize:"12px", textAlign:"center"
-            }}> Don’t have Pet Rent Hub account?
-                <span>
-                    <Link to="/register" className="text-red-500 "> Sign up now</Link>
-                </span>
-            </p>
-           
-        </div>
-        </div>
-        </>
-        
-    )
 
-    return (
-        <div className="overflow-hidden">
-         {content}
+            {/* Divider */}
+            <div className="flex items-center gap-4">
+              <div className="flex-1 h-px bg-gray-300 h-0.5"></div>
+              <p className="text-sm text-gray-500">OR CONTINUE WITH</p>
+              <div className="flex-1 h-px bg-gray-300 h-0.5"></div>
+            </div>
+
+            {/* Social Login */}
+            <div className="flex justify-center gap-6">
+              <button>
+                <img
+                  src={logo3}
+                  alt="Apple"
+                  className="w-8 h-8"
+                />
+              </button>
+              <button>
+                <img
+                  src={logo1}
+                  alt="Facebook"
+                  className="w-8 h-8"
+                />
+              </button>
+              <button>
+                <img
+                  src={logo2}
+                  alt="Google"
+                  className="w-8 h-8"
+                />
+              </button>
+            </div>
+
+            {/* Signup */}
+            <p className="text-center text-sm text-gray-600">
+              Doesn’t have an account?{" "}
+              <Link to="/register" className="text-blue-900 font-semibold">
+                Create One
+              </Link>
+            </p>
+          </div>
         </div>
-        
-    )
+
+        {/* Right Section - Image */}
+        <div className="flex-1 hidden rounded-2xl md:flex">
+          <img
+            src={imagebuy}
+            alt="Property"
+            className="w-full h-full py-4 rounded-2xl object-cover md:rounded-2xl"
+          />
+        </div>
+      </div>
+    </div>
+  );
 }
-export default LoginPage

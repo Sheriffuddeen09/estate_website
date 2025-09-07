@@ -45,3 +45,7 @@ const firebaseConfig = {
 
 #### Register Page
 [![Register Page](public/screenshots/Screenshot%202025-09-07%20080417.png)](public/screenshots/Screenshot%202025-09-07%20080417.png)
+
+
+**Video Record Link**
+https://drive.google.com/file/d/1sYOrVrK0JYNb09itUAClwMvtah7ML_iX/view?usp=sharing

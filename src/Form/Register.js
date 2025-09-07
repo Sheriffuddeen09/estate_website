@@ -1,302 +1,253 @@
-import {useEffect, useRef, useState } from "react"
-import { Link, useNavigate} from "react-router-dom"
-import { Api } from "../api/axios"
-import Header from "../Layout/Header"
-import Google from "./Google"
-import Facebook from "./Facebook"
-import Apple from "./Apple"
-import Profile from "../dashboard/Profile"
+import { useState } from "react";
+import { Mail, Lock, Home, Menu, X } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth, db } from "../services/firebase"; // ✅ make sure firebase.js exports auth & db
+import { setDoc, doc } from "firebase/firestore";
+import { toast } from "react-toastify";
+import imagebuy from "./image/Rectangle 1 (2).png";
 
-const RegisterPage = () =>{
-    const userRef = useRef()
-    const [formData, setFormData] = useState({
-        firstname: "",
-        lastname: "",
-        email: "",
-        password: "",
-        phone:'',
-        profile_image:null
+export default function RegisterPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [fname, setFname] = useState("");
+  const [lname, setLname] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match!", { position: "bottom-center" });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      const user = auth.currentUser;
+
+      if (user) {
+        await setDoc(doc(db, "Users", user.uid), {
+          email: user.email,
+          firstName: fname,
+          lastName: lname,
+          photo: "",
+        });
+      }
+
+      toast.success("User Registered Successfully!!", {
+        position: "top-center",
       });
-      const [message, setMessage] = useState("");
-      const [errors, setErrors] = useState({
-                                            server: "",
-                                            password: ""
-                                        });
-    const [loading, setLoading] = useState(false)
-    const [imageFile, setImageFile] = useState(null)
-    const [image, setImage] = useState(null)
-    const [success, setSuccess] = useState(false)
 
-    const navigate = useNavigate()
+      navigate("/login"); // ✅ redirect to login page
+    } catch (error) {
+      console.log(error.message);
+      toast.error(error.message, {
+        position: "bottom-center",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    useEffect(() => {
-        userRef.current.focus()
+  return (
+    <div className="min-h-screen flex flex-col bg-white">
+      {/* Top Navigation */}
+     <header className="flex justify-between items-center shadow-md py-6 px-8 md:px-16 lg:px-24 border-b relative">
+      {/* Left - Homepage */}
+      <Link
+        to="/"
+        className="hidden md:flex items-center gap-2 text-gray-600 border border-blue-600 px-4 py-2 rounded-full text-sm hover:bg-gray-100 transition"
+      >
+        ← Homepage
+      </Link>
 
-    }, [])
+      {/* Center Logo */}
+      <p className="font-bold text-black flex items-center gap-3">
+        <Home /> PropBot
+      </p>
 
-    useEffect(() => {
-        if (success) {
-            console.log("Navigating to login...");
-            navigate('/login');
-        }
-    }, [success, navigate]);
-    
+      {/* Right - About Us (desktop) */}
+      <Link
+        to="/about"
+        className="hidden md:block bg-blue-900 text-white px-5 py-2 rounded-full text-sm hover:bg-blue-700 transition"
+      >
+        About Us →
+      </Link>
 
+      {/* Mobile Menu Button */}
+      <button
+        className="md:hidden text-black"
+        onClick={() => setMenuOpen(!menuOpen)}
+      >
+        {menuOpen ? <X size={28} className="hidden" /> : <Menu size={28} />}
+      </button>
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-      };
-    
-      const handleImageChange = (e) => {
-        setImageFile(e.target.files[0])
-        setImage(e.target.files[0])
-      };
-       
-    
-      const handleSubmit = async (e) => {
-        e.preventDefault();
-    
-        console.log(formData.email, formData.password, formData.firstname, formData.lastname, formData.phone);
-        setLoading(true);
-    
-        const formDataToSend = new FormData();
-        formDataToSend.append("firstname", formData.firstname);
-        formDataToSend.append("lastname", formData.lastname);
-        formDataToSend.append("email", formData.email);
-        formDataToSend.append("password", formData.password);
-        formDataToSend.append("phone", formData.phone);
-        
-        if (image) {
-            formDataToSend.append("profile_image", image);
-        }
-    
-        try {
-            const response = await Api.post("/register.php", formDataToSend, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
-        
-            console.log("API Response:", response?.data); // Debugging API response
-            setSuccess(true);
-        
-            if (response.data.success) {
-                setMessage(response.data.message);
-                setErrors({});
-        
-                setFormData({
-                    email: '',
-                    firstname: '',
-                    lastname: '',
-                    password: '',
-                    phone: '',
-                    profile_image: null
-                });
-        
-            } else {
-                console.log("Registration failed:", response.data.message);
-                setErrors(prev => ({ ...prev, server: response.data.message || "Registration failed" }));
-            }
-        }          
-        catch (err) {
-            console.error("Error Response:", err.response);
-    
-            if (!err?.response) {
-                setErrors(prev => ({ ...prev, server: 'No server response' }));
-            } else if (err.response?.status === 409) {
-                setErrors(prev => ({ ...prev, server: 'Email already registered. Please use another email.' }));
-            } else if (err.response?.status === 400) {
-                setErrors(prev => ({ ...prev, server: 'Missing required fields' }));
-            } else {
-                setErrors(prev => ({ ...prev, server: 'Registration failed. Please try again.' }));
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
-    
+      {/* Mobile Menu Overlay */}
+      {menuOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-90 flex justify-center items-center z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-64  space-y-6 text-center">
+            <X size={28} className="text-black" onClick={() => setMenuOpen(!menuOpen)} />
+            <Link
+              to="/"
+              onClick={() => setMenuOpen(false)}
+              className="block text-gray-700 font-semibold  border border-blue-600 px-4 py-2 rounded-full hover:bg-gray-100 transition"
+            >
+              ← Homepage
+            </Link>
+            <Link
+              to="/about"
+              onClick={() => setMenuOpen(false)}
+              className="block bg-blue-900 text-white px-5 py-2 rounded-full font-semibold hover:bg-blue-700 transition"
+            >
+              About Us →
+            </Link>
+          </div>
+        </div>
+      )}
+    </header>
 
-    const content = (
-        <>
-        {
-              
-            <div className='flex flex-column justify-center mx-auto lg:my-8 my-3 rounded-2xl border border-green-500 items-center bg-white sm:w-96  md:my-16 items-center p-10 w-72'>
-            <div className="">
-            
-            <form onSubmit={handleSubmit} className="flex flex-col mx-auto justify-center items-center">
-                <div className="sm:mb-5 ">
-                    <h1 className="sm:text-3xl text-xl text-center text-green-400 font-serif"><span className="sm:text-2xl text-xl text-black mt-5 text-center font-bold font-roboto">Create Account</span></h1>
-                    <p className="text-sm text-black my-3  text-center font-roboto"> 
-                    Enter your order number and email address below to view your rental details. </p>
-                    <div className="flex flex-col justify-center items-center mb-4">
-                    <Google  />
-                    <Facebook />
-                     <Apple />
-                     </div>
-                    <div className="sm:inline-flex sm:flex-nowrap mx-auto translate-x-3 gap-1">
-                    <div>
-                    <p className="text-sm -mb-5 font-bold font-roboto text-black font-Cambria">
-                       Firstname:
-                    </p>
-                    <br />
-                    <input 
-                    className="border-2 border-green-200 px-2 w-64 sm:w-40 p-1 rounded-lg text-black outline-none"
-                    type="text"
-                    required
-                    name="firstname"
-                    id="firstname"
-                    value={formData.firstname}
-                    onChange={handleChange}
-                    ref={userRef}
-                    autoComplete="off"
-                    />
-                    </div>
-                    <div>
-                    <p className="text-sm font-roboto sm:text-sm font-bold -mb-5 text-black font-Cambria">
-                        Lastname:
-                    </p>
-                    <br />
-                    <input 
-                    className="border-2 border-green-200 w-64 px-2 sm:w-40 p-1 rounded-lg text-black outline-none"
-                    type="text"
-                    required
-                    name="lastname"
-                    id="lastname"
-                    value={formData.lastname}
-                    onChange={handleChange}
-                    autoComplete="off"
-                    />
-                </div>
-                </div>
-                <div className="translate-x-3">
-                    <p className="text-sm font-roboto sm:text-sm font-bold -mb-5 text-black font-Cambria">
-                        Email Address:
-                    </p>
-                    <br />
-                    <input 
-                    className="border-2 border-green-200 w-64 sm:w-80 px-2 p-1 rounded-lg text-black outline-none"
-                    type="text"
-                    required
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    autoComplete="off"
-                    />
-                </div>
-                <div className="translate-x-3">
-                    <p className="text-sm font-roboto sm:text-sm font-bold -mb-5 text-black font-Cambria">
-                        Phone Number:
-                    </p>
-                    <br />
-                    <input 
-                    className="border-2 border-green-200 w-64 sm:w-80 px-2 p-1 rounded-lg text-black outline-none"
-                    type="text"
-                    required
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    autoComplete="off"
-                    />
-                </div>
-                    <div className="translate-x-3">
-                    <p className="text-sm font-roboto font-bold -mb-5 text-black ">
-                        Password:
-                    </p>
-                    {errors.password && (
-                     <p className={`text-red-600 my-2 `}>
-                        {errors.password}
-                    </p>
-                    )}
-                    <br />
-                    <input 
-                     className="border-2 relative -mb-6 px-2 border-green-200 w-64 sm:w-80 p-1 rounded-lg text-black outline-none"
-                     type={'password'}
-                    required
-                    id="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    />
-                    </div>
-                   <div className="mt-5 border rounded border-2 border-green-500 p-2 flex justify-center items-center">
-                    <label
-                  htmlFor="image"
-                  className="btn btn-outline-secondary d-flex align-items-center"
-                  style={{
-                    cursor: "pointer",
-                    display: "inline-flex",
-                    gap: "10px",
-                  }}
-                >
+      {/* Main Content */}
+      <div className="flex flex-1 flex-col md:flex-row">
+        {/* Left Section - Form */}
+        <div className="flex-1 flex flex-col my-10 justify-center px-8 md:px-16 lg:px-24">
+          <div className="max-w-md w-full space-y-6">
+            <h2 className="text-2xl text-black font-bold text-center">
+              Create new account
+            </h2>
+
+            <form onSubmit={handleRegister} className="space-y-4">
+              {/* First Name */}
+              <div>
+                <label className="block text-sm font-medium text-black">
+                  First Name
+                </label>
+                <input
+                  type="text"
+                  value={fname}
+                  onChange={(e) => setFname(e.target.value)}
+                  placeholder="Enter First Name"
+                  required
+                  className="w-full border text-black rounded-lg px-4 py-3 border-blue-900 shadow-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                />
+              </div>
+
+              {/* Last Name */}
+              <div>
+                <label className="block text-sm font-medium text-black">
+                  Last Name
+                </label>
+                <input
+                  type="text"
+                  value={lname}
+                  onChange={(e) => setLname(e.target.value)}
+                  placeholder="Enter Last Name"
+                  required
+                  className="w-full border text-black rounded-lg px-4 py-3 border-blue-900 shadow-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                />
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-medium text-black">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter Your Email"
+                  required
+                  className="w-full border text-black rounded-lg px-4 py-3 border-blue-900 shadow-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                />
+              </div>
+
+              {/* Password */}
+              <div>
+                <label className="block text-sm font-medium text-black">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter Your Password"
+                  required
+                  className="w-full border rounded-lg px-4 py-3 text-black  border-blue-900 shadow-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                />
+              </div>
+
+              {/* Confirm Password */}
+              <div>
+                <label className="block text-sm font-medium text-black">
+                  Confirm Password
+                </label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm Your Password"
+                  required
+                  className="w-full border rounded-lg px-4 text-black py-3 border-blue-900 shadow-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                />
+              </div>
+
+              {/* Register Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-blue-900 text-white py-3 rounded-full font-semibold hover:bg-blue-700 transition flex items-center justify-center"
+              >
+                {loading ? (
                   <svg
+                    className="animate-spin h-5 w-5 text-white"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="black"
-                    className="border text-green-500 border-green-700 rounded-full "
-                    style={{ width: "24px", height: "24px", color:"green" }}
                   >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
                     <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 4.5v15m7.5-7.5h-15"
-                    />
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                    ></path>
                   </svg>
-                  <span style={{ color: "green", fontWeight: "bold" }}>
-                   Choose Profile
-                  </span>
-                </label>
-                <input
-                  type="file"
-                  id="image"
-                  onChange={handleImageChange}
-                  className="form-control"
-                  accept="image/*"
-                  style={{ display: "none" }} />
-
-                </div>
-            </div>
-            {imageFile && (
-                  <div className="mt-4 text-black font-bold text-sm">
-                    Selected file: <small>{imageFile.name}</small>
-                  </div>
+                ) : (
+                  "Create Account"
                 )}
-            
-                <button type="submit"  className="mb-3 w-64 mt-5 submit-bg text-white sm:w-80 p-1 rounded-2xl text-black outline-none"
-                     disabled={!formData.email || !formData.password || !formData.firstname || !formData.lastname || !formData.phone}>
-                {loading ? "Sending" : "Send"}
-                </button>
+              </button>
             </form>
-            
-            {errors.server && <p className={`text-red-600 my-2 text-center text-sm` }> {errors.server} </p>}
-           
-            
-            <p className="text-sm sm:block hidden"> Don’t have a Rover account?
-                <span>
-                    <Link to="/register" className="text-[#20bc7e] text-sm"> Sign up now</Link>
-                </span>
-            </p>
-            <p className=" block sm:hidden" style={{
-                fontSize:"12px", textAlign:"center"
-            }}> Don’t have Pet Rent Hub account?
-                <span>
-                    <Link to="/register" className="text-red-500 text-sm"> Sign up now</Link>
-                </span>
-            </p>
-           
-        </div>
-        </div>
-            }
-        </>
-        
-    )
 
-    return (
-        <div className="overflow-hidden">
-         {content}
+            {/* Redirect to Login */}
+            <p className="text-center text-sm text-gray-600">
+              Already have an account?{" "}
+              <Link to="/login" className="text-blue-900 font-semibold">
+                Log In
+              </Link>
+            </p>
+          </div>
         </div>
-        
-    )
+
+        {/* Right Section - Image */}
+        <div className="flex-1 hidden rounded-2xl md:flex">
+          <img
+            src={imagebuy}
+            alt="Property"
+            className="w-full h-full py-4 rounded-2xl object-cover md:rounded-2xl"
+          />
+        </div>
+      </div>
+    </div>
+  );
 }
-export default RegisterPage
