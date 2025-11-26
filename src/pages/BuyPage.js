@@ -1,6 +1,6 @@
 
-import Footer from "../components/Footer";
-import Header from "../components/Header";
+import Footer from "../layout/Footer";
+import Header from "../layout/Header";
 import { useEffect, useState } from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";

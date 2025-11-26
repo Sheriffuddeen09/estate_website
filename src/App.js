@@ -3,14 +3,16 @@ import { Route, Routes } from "react-router-dom";
 import LoginPage from "./Form/LoginPage";
 import RegisterPage from "./Form/Register";
 import HomePage from './pages/Home'
-import NotFound from "./components/Notfound";
+import NotFound from "./layout/Notfound";
 import BuyPage from "./pages/BuyPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useState } from "react";
 
    
 function App() {
 
+  
   return (
     <div className="">
       <Routes>

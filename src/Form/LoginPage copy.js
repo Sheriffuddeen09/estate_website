@@ -2,7 +2,6 @@ import {Home, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useRef, useState } from "react";
 import imagebuy from './image/path_islam.png'
-import axios from "axios";
 
 
 export default function LoginPage() {
@@ -25,88 +24,6 @@ export default function LoginPage() {
   const clearError = (field) => {
     setErrors(prev =>({...prev, [field]: ''}))
   }
-
-  const handleLoginNext = async () => {
-    const newErrors = {};
-
-    if (!loginEmail) newErrors.email = "Email is required";
-    if (!loginPassword) newErrors.loginPassword = "Password is required";
-
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-    
-
-    try {
-    setLoading(true);
-    await axios.post('/api/send-login-otp', {
-      email: loginEmail
-    })
-    setSteps(2);
-  }
-
-  catch (err) {
-      setErrors({ email: "Failed to send OTP. Try again." });
-    } finally {
-      setLoading(false);
-    }
-
-  }
-
-  const verifyOtpLogin = async () => {
-
-    setLoading(true)
-    const otp = otpBoxes.join('')
-    
-      if (otp.length !== 6){
-        setErrors({ otp: "Enter full 6-digit code" });
-      setLoading(false);
-      return;
-    }
-
-    try{
-
-    await axios.post('/api/send-otp', {
-      email: loginEmail,
-      otp
-    })
-
-    const loginRes = await axios.post('/api/login', {
-      email: loginEmail,
-      password: loginPassword,
-      remember
-    })
-    localStorage.setItem("token", loginRes.data.token)
-    window.location.href = "/dashboard";
-    } catch (err) {
-      setErrors({ otp: "Invalid OTP. Try again" });
-    } finally {
-      setLoading(false);
-    }   
-  }
-
-  const handleOtpChange = (value, index) => {
-    if (!/^\d*$/.test(value)) return;
-
-    const updated = [...otpBoxes];
-    updated[index] = value;
-    setOtpBoxes(updated);
-
-    if (value && index < 5) {
-      inputsRef.current[index + 1].focus();
-    }
-  };
-
-  const handleOtpKeyDown = (e, index) => {
-    if (e.key === "Backspace" && !otpBoxes[index] && index > 0) {
-      inputsRef.current[index - 1].focus();
-    }
-  };
-
-
-
   return (
     <div className="min-h-screen flex flex-col bg-white">
       {/* Top Navigation */}
@@ -164,17 +81,23 @@ export default function LoginPage() {
       )}
     </header>
 
+<div className="wrapper flex flex-col items-center block sm:hidden">
+  <p className="text-2xl welcome font-bold text-black mt-5 mb-2">Welcome to</p>
+  <ul className="dynamic mt-1 mb-5">
+    <ol><main>Islam Path of Knowledge</main></ol>
+  </ul>
+</div>
       {/* Main Content - Login + Image */}
       <div className="flex flex-1 flex-col items-center md:flex-row">
         {/* Left Section - Form */}
 <div className="flex flex-1 flex-col justify-center items-center p-6">
-        <div className="sm:w-full w-80 sm:max-w-md p-6 border border-blue-200 shadow-xl rounded-lg">
+        <div className="w-full max-w-md p-6 border border-blue-200 shadow-xl rounded-lg">
 
           {/* STEP 1 — Email + Password */}
           {steps === 1 && (
             <>
               <h2 className="text-2xl font-bold text-center text-black mb-6">
-                Login
+                Login to your account
               </h2>
 
               {/* Email */}
@@ -184,7 +107,7 @@ export default function LoginPage() {
                 </label>
                 <input
                   type="email"
-                  className="w-full border bg-white outline-0 focus:bg-white border-blue-200 text-black px-4 py-3 rounded"
+                  className="w-full border bg-white outline-0 border-blue-200 text-black px-4 py-3 rounded"
                   value={loginEmail}
                   onChange={(e) => {
                     setLoginEmail(e.target.value);
@@ -232,22 +155,22 @@ export default function LoginPage() {
 
               {/* NEXT */}
               <button
-                onClick={handleLoginNext}
+                // onClick={handleLoginNext}
                 className="w-full bg-blue-700 text-white py-3 rounded hover:bg-blue-800 hover:scale-105"
               >
                 {loading ? "Sending OTP..." : "Login"}
               </button>
 
-               <div className="flex items-center my-5 gap-4">
+               <div className="flex items-center gap-4">
               <div className="flex-1 h-px bg-gray-300 h-0.5"></div>
               <p className="text-sm text-gray-500">OR CONTINUE WITH</p>
               <div className="flex-1 h-px bg-gray-300 h-0.5"></div>
             </div>
 
-            <p className="text-center text-xs text-gray-600">
+            <p className="text-center text-sm text-gray-600">
               Don’t have an account?{" "}
-              <Link to="/register" className="text-blue-900 text-xs font-semibold">
-                Create Account
+              <Link to="/register" className="text-blue-900 font-semibold">
+                Create One
               </Link>
             </p>
             </>
@@ -292,7 +215,7 @@ export default function LoginPage() {
 
               <button
                 className="mt-6 px-4 py-2 bg-blue-700 float-right text-white rounded hover:bg-blue-800 hover:scale-105"
-                onClick={verifyOtpLogin}
+                // onClick={verifyOtpLogin}
               >
                 {loading ? "Verifying..." : "Verify OTP"}
               </button>
@@ -303,7 +226,7 @@ export default function LoginPage() {
       </div>
 
         {/* Right Section - Image */}
-        <div className="flex-1 hidden rounded-2xl lg:flex">
+        <div className="flex-1 hidden rounded-2xl md:flex">
           <img style={{
             borderTopLeftRadius: 10,
             borderTopRightRadius: 10
