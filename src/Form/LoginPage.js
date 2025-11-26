@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useRef, useState } from "react";
 import imagebuy from './image/path_islam.png'
 import axios from "axios";
+import ImageSlider from "./ImageSlider";
 
 
 export default function LoginPage() {
@@ -164,6 +165,13 @@ export default function LoginPage() {
       )}
     </header>
 
+      <div className="wrapper flex flex-col items-center block sm:hidden">
+      <p className="text-2xl welcome font-bold text-black mt-5 mb-2">Kick Start Your Study</p>
+      <ul className="dynamic mt-1 mb-">
+        <ol><main>Islam Path of Knowledge</main></ol>
+      </ul>
+    </div>
+
       {/* Main Content - Login + Image */}
       <div className="flex flex-1 flex-col items-center md:flex-row">
         {/* Left Section - Form */}
@@ -174,7 +182,7 @@ export default function LoginPage() {
           {steps === 1 && (
             <>
               <h2 className="text-2xl font-bold text-center text-black mb-6">
-                Login
+                
               </h2>
 
               {/* Email */}
@@ -304,14 +312,7 @@ export default function LoginPage() {
 
         {/* Right Section - Image */}
         <div className="flex-1 hidden rounded-2xl lg:flex">
-          <img style={{
-            borderTopLeftRadius: 10,
-            borderTopRightRadius: 10
-          }}
-            src={imagebuy}
-            alt="Property"
-            className="w-[700px] h-[500px] py-4 rounded-2xl shadow-2xl py-4 object-cover md:rounded-2xl"
-          />
+          <ImageSlider images={[imagebuy, imagebuy, imagebuy, imagebuy]} />
         </div>
       </div>
     </div>
