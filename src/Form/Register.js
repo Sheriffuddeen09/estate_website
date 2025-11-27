@@ -2,9 +2,10 @@ import { useRef, useState } from "react";
 import axios from "axios";
 import { Home, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
-import success from "./image/path_islam.png";
 import dua_success from "./image/dua_success.png";
+import success from "./image/path_islam.png";
 import dua from "./image/dua.png";
+import knowledge from "./image/dua_beneficial.png";
 import ImageSlider from "./ImageSlider";
 
 export default function RegisterPage() {
@@ -54,11 +55,52 @@ export default function RegisterPage() {
 
   }
 
-  const handleNext = () => {
-    if (validateError()) {
-      setSteps(2);
+ const handleNext = async () => {
+  // Run local validation first
+  if (!validateError()) return;
+
+  setLoading(true);
+  setErrors({});
+
+  try {
+    // Example API call to check something before next step
+    const res = await axios.post("http://127.0.0.1:8000/api/check", {
+      firstName,
+      lastName,
+      dob,
+      gender,
+    });
+
+    // If API responds without error, move to next step
+    setSteps(2);
+
+  } catch (err) {
+    let msg = "Something went wrong";
+
+    if (err.response) {
+      const serverMsg = err.response.data.message || "";
+
+      // Detect SQLSTATE or connection errors
+      if (
+        serverMsg.includes("SQLSTATE") ||
+        serverMsg.toLowerCase().includes("connection") ||
+        serverMsg.toLowerCase().includes("refused")
+      ) {
+        msg = "Server down, please try later";
+      } else {
+        msg = serverMsg || msg;
+      }
+    } else if (err.request) {
+      // No response from server at all
+      msg = "Server not reachable, please try later";
     }
-    }
+
+    // Show the error and prevent advancing
+    setErrors({ general: msg });
+  } finally {
+    setLoading(false);
+  }
+};
 
 const autoSentOtp = async () =>{
 
@@ -73,7 +115,7 @@ const autoSentOtp = async () =>{
   
 }
 
-
+// The route api/check could not be found
 
   const handleNextRole = () =>{
     const newErrors = {}
@@ -293,7 +335,7 @@ const handleRegister = async () =>{
       {/* Left - Homepage */}
       <Link
         to="/"
-        className="hidden md:flex items-center gap-2 text-gray-600 border border-blue-600 px-4 py-2 rounded-full text-sm hover:bg-gray-100 transition"
+        className="hidden md:flex items-center gap-2 text-black border border-blue-600 px-4 py-2 rounded-full text-sm hover:bg-blue-200 transition"
       >
         ← Homepage
       </Link>
@@ -356,6 +398,16 @@ const handleRegister = async () =>{
         {/* Left Section - Form */}
        
          <div className="lg:w-5/12 md:w-full w-80 mx-auto p-6 border border-1 border-blue-200 shadow-2xl rounded-lg">
+         <button
+          className="px-4 py-2  text-black rounded opacity-60 "
+          
+        >
+          <Link to={'/login'}>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75 3 12m0 0 3.75-3.75M3 12h18" />
+</svg>
+</Link>
+        </button>
           {
             steps === 1 && (
               <>
@@ -390,6 +442,7 @@ const handleRegister = async () =>{
   <input
     type="date"
     value={dob}
+    required
     onChange={(e) => {
       setDob(e.target.value);
       clearError("dob");
@@ -423,10 +476,39 @@ const handleRegister = async () =>{
             </div>
             </div>
                 <br />
+                 {errors.general && (
+              <div className="text-red-700 text-xs p-3 rounded mb-3">
+                {errors.general}
+              </div>
+            )}
+
             <button  onClick={handleNext} className="px-4 py-2 bg-blue-700 mt-8 text-white rounded float-right hover:bg-blue-800  hover:scale-105">
+            {loading ? (
+    <svg
+      className="animate-spin h-5 w-5 text-white"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      ></circle>
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+      ></path>
+    </svg>
+  ) : (
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
   <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
 </svg>
+  )}
 
             </button>
           </div>
@@ -712,7 +794,7 @@ const handleRegister = async () =>{
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+          className="absolute right-3 top-4 text-gray-500"
         >
           {showPassword ? (
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5">
@@ -724,7 +806,7 @@ const handleRegister = async () =>{
             </svg>
           )}
         </button>
-        {errors.password && <p className="text-red-600 text-xs mt-1">{errors.password}</p>}
+        {errors.password && <p className="text-red-600 text-xs mt-2">{errors.password}</p>}
       </div>
 
       {/* Confirm Password */}
@@ -741,7 +823,7 @@ const handleRegister = async () =>{
         <button
           type="button"
           onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+          className="absolute right-3 top-4 text-gray-500"
         >
           {showPasswordConfirm ? (
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5">
@@ -857,7 +939,7 @@ const handleRegister = async () =>{
          </div>
         {/* Right Section - Image */}
         <div className="flex-1 hidden rounded-2xl lg:flex">
-         <ImageSlider images={[success, dua, dua_success]} />
+         <ImageSlider images={[success,knowledge, dua, dua_success]}  />
         </div>
       </div>
   

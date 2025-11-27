@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import logos from './image/favicon.png'
 import { CreativeCommons, Database, Globe, LibraryIcon, MessageCircle, Search, User, User2 } from "lucide-react";
+import axios from 'axios';
 
 function Navbar() {
 
@@ -11,25 +12,49 @@ function Navbar() {
       const [content, setContent] = useState(false)
       const [user, setUser] = useState(null);
       const homepage = useLocation().pathname
-      // const auth = getAuth();
-    
-      // // Monitor Firebase login state
-      // useEffect(() => {
-      //   const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      //     setUser(currentUser);
-      //   });
-      //   return () => unsubscribe();
-      // }, [auth]);
-    
-      // // Handle sign out
-      // const handleSignOut = async () => {
-      //   try {
-      //     await signOut(auth);
-      //     console.log("Signed out successfully");
-      //   } catch (err) {
-      //     console.error("Sign out error:", err.message);
-      //   }
-      // };
+      const [isRegistered, setIsRegistered] = useState(false);
+
+      const handleSignOut = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+        setUser(null); // update UI
+      };
+
+
+   useEffect(() => {
+  const fetchStatus = async () => {
+    try {
+      const token = localStorage.getItem("token"); // or "auth_token", pick one
+      if (!token) {
+        setIsRegistered(false);
+        setUser(null);
+        return;
+      }
+
+      const res = await axios.get("http://127.0.0.1:8000/api/user-status", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.data.status === "logged_in") {
+        setUser(res.data.user);
+        setIsRegistered(false);
+      } else if (res.data.status === "registered") {
+        setUser(null);
+        setIsRegistered(true);
+      }
+    } catch (err) {
+      console.error(err);
+      setUser(null);
+      setIsRegistered(false);
+    }
+  };
+
+  fetchStatus();
+}, []);
+
 
     const handlemenu = () => {
       setMenu(!menu)
@@ -52,21 +77,20 @@ function Navbar() {
                   <div className='w-96 shadow-md absolute -left-24 z-50 top-10 rounded-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible group-hover:translate-y-2 transform transition-all duration-500
                 bg-gray-50 text-black '>
                   <div className='py-6 px-4 gap-3 grid grid-cols-3 mx-auto text-start '>
-                    <Link to={'/all'} className={` ${homepage === '/all' ? 'text-blue-400' : 'text-gray-600'} px-3 py-1 text-xs hover:text-blue-800 hover:text-white hover:bg-blue-600 px-3 py-1 text-xs rounded-lg hover:scale-105`}>All</Link>
-                     <Link to={'/marriage'} className='hover:text-gray-200 hover:bg-blue-600 px-3 py-1 text-xs rounded-lg '>Marriage</Link>
-                    <Link to={'/hadith'} className='hover:text-white hover:bg-blue-600 px-3 py-1 text-xs rounded-lg hover:scale-105'>Hadith</Link>
-                    <Link to={'/translation'} className='hover:text-white hover:bg-blue-600 px-3 py-1 text-xs rounded-lg hover:scale-105'> Translation</Link>
-                    <Link to={'/transliteration'} className='hover:text-white hover:bg-blue-600 px-3 py-1 text-xs rounded-lg hover:scale-105'>Transliteration</Link>
-                    <Link to={'/tawheed'} className='hover:text-white hover:bg-blue-600 px-3 py-1 text-xs rounded-lg hover:scale-105'>Tawheed</Link>
-                    <Link to={'/mufrad'} className='hover:text-white hover:bg-blue-600 px-3 py-1 text-xs whitespace-nowrap rounded-lg'>Al-Adab-Al-Mufrad</Link>
-                    <Link to={'/sofr'} className='hover:text-white hover:bg-blue-600 px-3 py-1 text-xs rounded-lg hover:scale-105'>Sofr</Link>
-                    <Link to={'/naw'} className='hover:text-white hover:bg-blue-600 px-3 py-1 text-xs rounded-lg hover:scale-105'>Nahw</Link>
-                    <Link to={'/tajweed'} className='hover:text-white hover:bg-blue-600 px-3 py-1 text-xs rounded-lg hover:scale-105'>Tajweed</Link>
-                    <Link to={'/quran'} className='hover:text-white hover:bg-blue-600 px-3 py-1 text-xs rounded-lg hover:scale-105'>Quran</Link>
-                    <Link to={'/patient'} className='hover:text-white hover:bg-blue-600 px-3 py-1 text-xs rounded-lg hover:scale-105'>Patient Quote</Link>
-                    <Link to={'/dua'} className='hover:text-white hover:bg-blue-600 px-3 py-1 text-xs rounded-lg hover:scale-105'>Dua</Link>
-                    <Link to={'/fiqh'} className='hover:text-white hover:bg-blue-600 px-3 py-1 text-xs rounded-lg hover:scale-105'>Fiqh</Link>
-                    <Link to={'/others'} className='hover:text-white hover:bg-blue-600 px-3 py-1 text-xs rounded-lg hover:scale-105'>Others</Link>
+                    <Link to={'/all'} className={` ${homepage === '/all' ? 'text-blue-400' : 'text-gray-600'} px-3 py-1 text-xs hover:text-blue-800 hover:text-gray-700 hover:bg-gray-200 px-3 py-1 text-xs rounded-lg hover:scale-105`}>All</Link>
+                     <Link to={'/marriage'} className='hover:text-gray-700 hover:bg-gray-200 px-3 py-1 text-xs rounded-lg '>Marriage</Link>
+                    <Link to={'/hadith'} className='hover:text-gray-700 hover:bg-gray-200 px-3 py-1 text-xs rounded-lg hover:scale-105'>Hadith</Link>
+                    <Link to={'/translation'} className='hover:text-gray-700 hover:bg-gray-200 px-3 py-1 text-xs rounded-lg hover:scale-105'> Tafseer</Link>
+                    <Link to={'/tawheed'} className='hover:text-gray-700 hover:bg-gray-200 px-3 py-1 text-xs rounded-lg hover:scale-105'>Tawheed</Link>
+                    <Link to={'/mufrad'} className='hover:text-gray-700 hover:bg-gray-200 px-3 py-1 text-xs whitespace-nowrap rounded-lg'>Al-Mufrad</Link>
+                    <Link to={'/sofr'} className='hover:text-gray-700 hover:bg-gray-200 px-3 py-1 text-xs rounded-lg hover:scale-105'>Sofr</Link>
+                    <Link to={'/naw'} className='hover:text-gray-700 hover:bg-gray-200 px-3 py-1 text-xs rounded-lg hover:scale-105'>Nahw</Link>
+                    <Link to={'/tajweed'} className='hover:text-gray-700 hover:bg-gray-200 px-3 py-1 text-xs rounded-lg hover:scale-105'>Tajweed</Link>
+                    <Link to={'/quran'} className='hover:text-gray-700 hover:bg-gray-200 px-3 py-1 text-xs rounded-lg hover:scale-105'>Quran</Link>
+                    <Link to={'/patient'} className='hover:text-gray-700 hover:bg-gray-200 px-3 py-1 text-xs rounded-lg hover:scale-105'>Patient Quote</Link>
+                    <Link to={'/dua'} className='hover:text-gray-700 hover:bg-gray-200 px-3 py-1 text-xs rounded-lg hover:scale-105'>Dua</Link>
+                    <Link to={'/fiqh'} className='hover:text-gray-700 hover:bg-gray-200 px-3 py-1 text-xs rounded-lg hover:scale-105'>Fiqh</Link>
+                    <Link to={'/others'} className='hover:text-gray-700 hover:bg-gray-200 px-3 py-1 text-xs rounded-lg hover:scale-105'>Others</Link>
                     </div>
                 </div>
                 </Link>
@@ -78,8 +102,8 @@ function Navbar() {
                 <div className='w-48 shadow-md absolute -left-4 top-10 z-50 rounded-lg opacity-0 invisible group-hover:visible group-hover:opacity-100 group-hover:translate-y-2 transform transition-all duration-500
                 bg-gray-50 text-black '>
                   <div className='py-6 px-4 gap-3 grid grid-cols-1 text-sm mx-auto text-start '>
-                    <Link to={'/add_student'} className='hover:text-white hover:bg-blue-600 px-3 py-1 text-xs rounded-lg hover:scale-105'>Add Student</Link>
-                    <Link to={'/arabic_mentor'} className='hover:text-white hover:bg-blue-600 px-3 py-1 text-xs rounded-lg hover:scale-105'>Get a Arabic Mentor</Link>
+                    <Link to={'/add_student'} className='hover:text-gray-700 hover:bg-gray-200 px-3 py-1  text-xs rounded-lg hover:scale-105'>Add Student</Link>
+                    <Link to={'/arabic_mentor'} className='hover:text-gray-700 hover:bg-gray-200 px-3 py-1 text-xs rounded-lg hover:scale-105'>Get a Arabic Mentor</Link>
                     
                     </div>
                   </div>
@@ -117,27 +141,37 @@ function Navbar() {
             <input placeholder='Search' className='border px-7 focus:border-gray-300 outline-none text-black border-gray-400  h-9 w-44 rounded-lg' />
             <Search className="absolute left-1 top-2 w-5 h-5 text-gray-400" />
             </div>
-            <div className='hidden md:block'>
+          
+        <div className='hidden md:block'>
             <Link to={'/library'} className={`${homepage === '/library' ? 'text-blue-400' : 'text-gray-600'} text-black inline-flex text-gray-600 hover:text-blue-800 font-bold rounded-xl lg:p-2 p-1 transition-all duration-500 ease-in-out cursor-pointer tech`}><LibraryIcon /> Library
             </Link>
             </div>
             <div className="md:block hidden">
-                            {user ? (
-                              <button
-                                // onClick={handleSignOut}
-                                className="bg-gray-800 w-28 font-bold text-white px-5 py-2 text-sm rounded-full flex items-center gap-2 hover:bg-red-700"
-                              >
-                               <Database className="w-4 h-4" /> Dashboard
-                              </button>
-                            ) : (
-                              <Link
-                                to="/login"
-                                className="bg-blue-700 w-full text-white px-5 py-2 text-sm rounded-full flex items-center gap-2 hover:bg-blue-800"
-                              >
-                               <User className="w-4 h-4" />  Login 
-                              </Link>
-                            )}
-                          </div>
+
+            {user ? (
+            <Link
+              to="/dashboard"
+              className="bg-gray-800 w-28 font-bold text-white px-5 py-2 text-sm rounded-full flex items-center gap-2 hover:bg-gray-900"
+            >
+              Dashboard
+            </Link>
+          ) : isRegistered ? (
+            <Link
+              to="/login"
+              className="bg-blue-700 w-32 text-white px-5 py-2 text-sm rounded-full flex justify-center items-center gap-2 hover:bg-blue-800"
+            >
+              Login
+            </Link>
+          ) : (
+            <Link
+              to="/register"
+              className="bg-green-700 w-32 text-white px-5 py-2 text-sm rounded-full flex justify-center items-center gap-2 hover:bg-green-800"
+            >
+              Register
+            </Link>
+          )}
+
+      </div>
 
                            <button
             onClick={handlemenu}
@@ -261,24 +295,44 @@ function Navbar() {
             </div>
             </div>
       <div className="block md:hidden">
-      <div className="flex justify-start">
-          {user ? (
-            <button
-              // onClick={handleSignOut}
-              className="bg-gray-800 w-28 font-bold text-white px-5 py-2 text-sm rounded-full flex end items-center gap-2 hover:bg-red-700"
-            >
-              <Database className="w-4 h-4" /> Dashboard
-            </button>
-          ) : (
-            <Link
-              to="/login"
-              className="bg-blue-700 w-32 text-white px-5 py-2 text-sm rounded-full flex justify-center items-center gap-2 hover:bg-blue-800"
-            >
-              <User className="w-4 h-4" />  Login 
-            </Link>
-          )}
-        </div>
-        </div>
+  <div className="flex justify-start">
+
+    {/* USER IS LOGGED IN */}
+    {user ? (
+      <>
+        {/* Show Dashboard only */}
+        <Link
+          to="/dashboard"
+          className="bg-gray-800 w-28 font-bold text-white px-5 py-2 text-sm rounded-full flex items-center gap-2 hover:bg-gray-900"
+        >
+          <Database className="w-4 h-4" /> Dashboard
+        </Link>
+      </>
+    ) : (
+      <>
+        {/* USER IS LOGGED OUT */}
+        {isRegistered === false ? (
+          // Not registered → show Register only
+          <Link
+            to="/register"
+            className="bg-green-700 w-32 text-white px-5 py-2 text-sm rounded-full flex justify-center items-center gap-2 hover:bg-green-800"
+          >
+            <User className="w-4 h-4" /> Register
+          </Link>
+        ) : (
+          // Logged out → show Login only
+          <Link
+            to="/login"
+            className="bg-blue-700 w-32 text-white px-5 py-2 text-sm rounded-full flex justify-center items-center gap-2 hover:bg-blue-800"
+          >
+            <User className="w-4 h-4" /> Login
+          </Link>
+        )}
+      </>
+    )}
+
+  </div>
+</div>
 
         </section>
         </div>

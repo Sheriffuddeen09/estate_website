@@ -19,7 +19,7 @@ export default function LoginPage() {
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [remember, setRemember] = useState(false);
-
+  const [resendTimer, setResendTimer] = useState(0);
   // OTP
   const [otpBoxes, setOtpBoxes] = useState(["", "", "", "", "", ""]);
   const inputsRef = useRef([]);
@@ -45,38 +45,72 @@ export default function LoginPage() {
     return;
   }
 
-  try {
-    setLoading(true);
+  setLoading(true);
+  setErrors({});
 
+  try {
     // STEP 1: Check email + password before OTP
     const check = await axios.post("http://127.0.0.1:8000/api/login-check", {
       email: loginEmail,
-      password: loginPassword
+      password: loginPassword,
     });
 
-    // If check passed → email & password are correct
     // STEP 2: Send OTP
     await axios.post("http://127.0.0.1:8000/api/login-otp", {
-      email: loginEmail
+      email: loginEmail,
     });
 
     // STEP 3: Move to OTP screen
     setSteps(2);
-  } 
-  catch (err) {
+  } catch (err) {
     let msg = "Something went wrong";
 
     if (err.response) {
-      msg = err.response.data.message || msg;
+      const serverMsg = err.response.data.message || "";
+
+      // Handle database/server connection errors
+      if (
+        serverMsg.includes("SQLSTATE") ||
+        serverMsg.toLowerCase().includes("connection") ||
+        serverMsg.toLowerCase().includes("refused")
+      ) {
+        msg = "Server down, please try later";
+      } else {
+        // Use backend message for other cases
+        msg = serverMsg || msg;
+      }
+    } else if (err.request) {
+      // No response from server at all
+      msg = "Server not reachable, please try later";
     }
 
     setErrors({ email: msg });
-  }
-  finally {
+  } finally {
     setLoading(false);
   }
 };
 
+
+const resendOtp = async () => {
+  try {
+    const response = await axios.post("http://127.0.0.1:8000/api/login-otp", { email: loginEmail });
+
+    // Start cooldown (e.g., 30 seconds)
+    setResendTimer(30);
+    const interval = setInterval(() => {
+      setResendTimer(prev => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+  } catch (err) {
+    setErrors({ errors: "Failed to send OTP. Try again." });
+  }
+};
 
   const verifyOtpLogin = async () => {
 
@@ -137,7 +171,7 @@ export default function LoginPage() {
       {/* Left - Homepage */}
       <Link
         to="/"
-        className="hidden md:flex items-center gap-2 text-gray-600 border border-blue-600 px-4 py-2 rounded-full text-sm hover:bg-gray-100 transition"
+        className="hidden md:flex items-center gap-2 text-black border border-blue-600 px-4 py-2 rounded-full text-sm hover:bg-blue-200 transition"
       >
         ← Homepage
       </Link>
@@ -242,7 +276,7 @@ export default function LoginPage() {
                 <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+          className="absolute right-3 top-4 text-gray-500"
         >
           {showPassword ? (
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5">
@@ -255,7 +289,7 @@ export default function LoginPage() {
           )}
         </button>
               {errors.email && (
-                        <p className="text-red-600 text-xs mt-3">{errors.email}</p>
+                        <p className="text-red-600 text-xs mt-2">{errors.email}</p>
                       )}
               </div>
 
@@ -347,13 +381,24 @@ export default function LoginPage() {
                       handleOtpChange(e.target.value, i)
                     }
                     onKeyDown={(e) => handleOtpKeyDown(e, i)}
-                    className="w-10 h-10 text-center text-black border rounded text-xl"
+                    className="w-10 h-10 text-center text-black border border-blue-500 shadow-2xl rounded text-xl"
                   />
                 ))}
               </div>
+                <div className="mt-4 text-center">
+              <button style={{
+                backgroundColor: 'transparent',
+              }}
+                className={`px-4 py-2 rounded mx-auto ${resendTimer > 0 ? 'bg-transparent hover:bg-transparent text-gray-400 cursor-not-allowed' : 'bg-transparent text-blue-600 font-bold hover:bg-blue-700'}`}
+                onClick={resendOtp}
+                disabled={resendTimer > 0}
+              >
+                {resendTimer > 0 ? `Resend OTP in ${resendTimer}s` : "Resend OTP"}
+              </button>
+            </div>
 
               {errors.otp && (
-                <p className="text-red-600 text-xs mt-2">{errors.otp}</p>
+                <p className="text-red-600 sm:translate-x-8 translate-x-2 text-xs mt-2">{errors.otp}</p>
               )}
 
               <button

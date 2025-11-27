@@ -161,16 +161,23 @@
   scroll-snap-type: mandatory x;
   overflow-y: scroll;
 }
-.hide-date-text::-webkit-datetime-edit {
-  opacity: 0; /* hide the text */
+/* Hide the default mm-dd-yyyy text ONLY when no date is selected */
+.hide-date-text:invalid::-webkit-datetime-edit {
+    color: transparent;
 }
 
-.hide-date-text::-webkit-calendar-picker-indicator {
-  position: absolute;
-  right: 12px;
-  cursor: pointer;
-  opacity: 1;
+/* Show the entered date normally */
+.hide-date-text::-webkit-datetime-edit:not(:empty) {
+    color: black;
 }
+
+/* Calendar icon stays visible */
+.hide-date-text::-webkit-calendar-picker-indicator {
+    position: absolute;
+    right: 12px;
+    cursor: pointer;
+}
+
 .wrapper {
   display: inline-flex;
 }
