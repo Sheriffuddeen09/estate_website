@@ -2,7 +2,10 @@ import { useRef, useState } from "react";
 import axios from "axios";
 import { Home, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
-import imagebuy from "./image/path_islam.png";
+import success from "./image/path_islam.png";
+import dua_success from "./image/dua_success.png";
+import dua from "./image/dua.png";
+import ImageSlider from "./ImageSlider";
 
 export default function RegisterPage() {
  
@@ -854,11 +857,7 @@ const handleRegister = async () =>{
          </div>
         {/* Right Section - Image */}
         <div className="flex-1 hidden rounded-2xl lg:flex">
-          <img
-            src={imagebuy}
-            alt="Property"
-            className="w-full h-full py-4 rounded-2xl object-cover md:rounded-2xl"
-          />
+         <ImageSlider images={[success, dua, dua_success]} />
         </div>
       </div>
   

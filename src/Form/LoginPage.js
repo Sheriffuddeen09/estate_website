@@ -1,9 +1,13 @@
 import {Home, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useRef, useState } from "react";
-import imagebuy from './image/path_islam.png'
-import axios from "axios";
+import dua_success from "./image/dua_success.png";
+import success from "./image/path_islam.png";
+import dua from "./image/dua.png";
+import knowledge from "./image/dua_beneficial.png";
 import ImageSlider from "./ImageSlider";
+import axios from "axios";
+import logos from './image/favicon.png'
 
 
 export default function LoginPage() {
@@ -21,40 +25,58 @@ export default function LoginPage() {
   const inputsRef = useRef([]);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
 
   const clearError = (field) => {
     setErrors(prev =>({...prev, [field]: ''}))
   }
 
+
+
   const handleLoginNext = async () => {
-    const newErrors = {};
+  const newErrors = {};
 
-    if (!loginEmail) newErrors.email = "Email is required";
-    if (!loginPassword) newErrors.loginPassword = "Password is required";
+  if (!loginEmail) newErrors.email = "Email is required";
+  if (!loginPassword) newErrors.loginPassword = "Password is required";
 
+  if (Object.keys(newErrors).length > 0) {
+    setErrors(newErrors);
+    return;
+  }
 
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-    
-
-    try {
+  try {
     setLoading(true);
-    await axios.post('/api/send-login-otp', {
-      email: loginEmail
-    })
-    setSteps(2);
-  }
 
+    // STEP 1: Check email + password before OTP
+    const check = await axios.post("http://127.0.0.1:8000/api/login-check", {
+      email: loginEmail,
+      password: loginPassword
+    });
+
+    // If check passed → email & password are correct
+    // STEP 2: Send OTP
+    await axios.post("http://127.0.0.1:8000/api/login-otp", {
+      email: loginEmail
+    });
+
+    // STEP 3: Move to OTP screen
+    setSteps(2);
+  } 
   catch (err) {
-      setErrors({ email: "Failed to send OTP. Try again." });
-    } finally {
-      setLoading(false);
+    let msg = "Something went wrong";
+
+    if (err.response) {
+      msg = err.response.data.message || msg;
     }
 
+    setErrors({ email: msg });
   }
+  finally {
+    setLoading(false);
+  }
+};
+
 
   const verifyOtpLogin = async () => {
 
@@ -69,12 +91,12 @@ export default function LoginPage() {
 
     try{
 
-    await axios.post('/api/send-otp', {
+    await axios.post('http://127.0.0.1:8000/api/login-verify', {
       email: loginEmail,
       otp
     })
 
-    const loginRes = await axios.post('/api/login', {
+    const loginRes = await axios.post('http://127.0.0.1:8000/api/login', {
       email: loginEmail,
       password: loginPassword,
       remember
@@ -111,7 +133,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       {/* Top Navigation */}
-      <header className="flex justify-between items-center shadow-md py-4 px-8 md:px-16 lg:px-24 border-b relative">
+      <header className="flex justify-between items-center shadow-md py-4 px-4 md:px-16 lg:px-24 border-b relative">
       {/* Left - Homepage */}
       <Link
         to="/"
@@ -121,8 +143,10 @@ export default function LoginPage() {
       </Link>
 
       {/* Center Logo */}
-       <p className="font-bold text-black text-lg font-serif flex items-center gap-3">
-        <Home /> Islam Path Of Knowledge
+       <p className="font-bold text-black text-[15px] font-serif flex items-center gap-3">
+        <Link to={'/'}>
+              <img src={logos} alt='logo' width={30} height={30}/>
+              </Link> Islam Path Of Knowledge
       </p>
 
       {/* Right - About Us (desktop) */}
@@ -199,9 +223,7 @@ export default function LoginPage() {
                     clearError("email");
                   }}
                 />
-                {errors.email && (
-                  <p className="text-red-600 text-xs mt-1">{errors.email}</p>
-                )}
+                
               </div>
 
               {/* Password */}
@@ -210,17 +232,31 @@ export default function LoginPage() {
                   Password
                 </label>
                 <input
-                  type="password"
                   className="w-full border bg-white outline-0 border-blue-200 text-black px-4 py-3 rounded"
+                  type={showPassword ? "text" : "password"}
                   value={loginPassword}
                   onChange={(e) => {
                     setLoginPassword(e.target.value);
-                    clearError("password");
-                  }}
+                    clearError("password");}}
                 />
-                {errors.password && (
-                  <p className="text-red-600 text-xs mt-1">{errors.password}</p>
-                )}
+                <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+        >
+          {showPassword ? (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18M10.5 10.5a3 3 0 104.5 4.5M9.75 14.25l4.5-4.5" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zM12 9a3 3 0 100 6 3 3 0 000-6z" />
+            </svg>
+          )}
+        </button>
+              {errors.email && (
+                        <p className="text-red-600 text-xs mt-3">{errors.email}</p>
+                      )}
               </div>
 
               {/* Remember Me */}
@@ -241,9 +277,31 @@ export default function LoginPage() {
               {/* NEXT */}
               <button
                 onClick={handleLoginNext}
-                className="w-full bg-blue-700 text-white py-3 rounded hover:bg-blue-800 hover:scale-105"
+                className="w-full bg-blue-700 text-white py-3 mx-auto rounded hover:bg-blue-800 hover:scale-105"
               >
-                {loading ? "Sending OTP..." : "Login"}
+                 {loading ? (
+    <svg
+      className="animate-spin h-5 w-5 text-white mx-auto"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      ></circle>
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+      ></path>
+    </svg>
+  ) : ( "Login") 
+  }
               </button>
 
                <div className="flex items-center my-5 gap-4">
@@ -285,11 +343,11 @@ export default function LoginPage() {
                     ref={(el) => (inputsRef.current[i] = el)}
                     value={val}
                     maxLength={1}
-                    // onChange={(e) =>
-                    //   handleOtpChange(e.target.value, i)
-                    // }
-                    // onKeyDown={(e) => handleOtpKeyDown(e, i)}
-                    className="w-14 h-14 text-center text-black border rounded text-xl"
+                    onChange={(e) =>
+                      handleOtpChange(e.target.value, i)
+                    }
+                    onKeyDown={(e) => handleOtpKeyDown(e, i)}
+                    className="w-10 h-10 text-center text-black border rounded text-xl"
                   />
                 ))}
               </div>
@@ -302,7 +360,29 @@ export default function LoginPage() {
                 className="mt-6 px-4 py-2 bg-blue-700 float-right text-white rounded hover:bg-blue-800 hover:scale-105"
                 onClick={verifyOtpLogin}
               >
-                {loading ? "Verifying..." : "Verify OTP"}
+                 {loading ? (
+    <svg
+      className="animate-spin h-5 w-5 text-white mx-auto"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      ></circle>
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+      ></path>
+    </svg>
+  ) : ( "Verify OTP")
+  }
               </button>
             </>
           )}
@@ -311,8 +391,8 @@ export default function LoginPage() {
       </div>
 
         {/* Right Section - Image */}
-        <div className="flex-1 hidden rounded-2xl lg:flex">
-          <ImageSlider images={[imagebuy, imagebuy, imagebuy, imagebuy]} />
+        <div className="flex-1 hidden bg-blue-500 rounded-tl-2xl shadow-2xl rounded-bl-2xl lg:flex">
+          <ImageSlider images={[success,knowledge, dua, dua_success]} />
         </div>
       </div>
     </div>
