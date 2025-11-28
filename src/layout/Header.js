@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import logos from './image/favicon.png'
-import { CreativeCommons, Database, Globe, LibraryIcon, MessageCircle, Search, User, User2 } from "lucide-react";
+import { CreativeCommons, Database, Globe, LayoutDashboard, LibraryIcon, MessageCircle, Search, User, User2, User2Icon } from "lucide-react";
 import axios from 'axios';
 
 function Navbar() {
@@ -12,7 +12,7 @@ function Navbar() {
       const [content, setContent] = useState(false)
       const [user, setUser] = useState(null);
       const homepage = useLocation().pathname
-      const [isRegistered, setIsRegistered] = useState(false);
+      const [isLoggedin, setIsLoggedin] = useState(false);
 
       const handleSignOut = () => {
         localStorage.removeItem("token");
@@ -21,40 +21,27 @@ function Navbar() {
         setUser(null); // update UI
       };
 
+     useEffect(() => {
+  const token = localStorage.getItem("token");
 
-   useEffect(() => {
-  const fetchStatus = async () => {
-    try {
-      const token = localStorage.getItem("token"); // or "auth_token", pick one
-      if (!token) {
-        setIsRegistered(false);
-        setUser(null);
-        return;
-      }
-
-      const res = await axios.get("http://127.0.0.1:8000/api/user-status", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (res.data.status === "logged_in") {
-        setUser(res.data.user);
-        setIsRegistered(false);
-      } else if (res.data.status === "registered") {
-        setUser(null);
-        setIsRegistered(true);
-      }
-    } catch (err) {
-      console.error(err);
-      setUser(null);
-      setIsRegistered(false);
-    }
-  };
-
-  fetchStatus();
+  if (!token || token === "undefined" || token === "null") {
+    setIsLoggedin(false);
+  } else {
+    setIsLoggedin(true);
+  }
 }, []);
 
+
+//    <button
+//   onClick={() => {
+//     localStorage.removeItem("token");
+//     window.location.href = "/login"; // redirect
+//   }}
+//   className="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700"
+// >
+//   Logout
+// </button>
+// input
 
     const handlemenu = () => {
       setMenu(!menu)
@@ -137,37 +124,33 @@ function Navbar() {
             </div>
 
             <div className='flex gap-5 flex-row items-center'>
-            <div className='relative'>
+            <div className='relative lg:block md:hidden block'>
             <input placeholder='Search' className='border px-7 focus:border-gray-300 outline-none text-black border-gray-400  h-9 w-44 rounded-lg' />
             <Search className="absolute left-1 top-2 w-5 h-5 text-gray-400" />
             </div>
-          
+      
+
         <div className='hidden md:block'>
             <Link to={'/library'} className={`${homepage === '/library' ? 'text-blue-400' : 'text-gray-600'} text-black inline-flex text-gray-600 hover:text-blue-800 font-bold rounded-xl lg:p-2 p-1 transition-all duration-500 ease-in-out cursor-pointer tech`}><LibraryIcon /> Library
             </Link>
             </div>
             <div className="md:block hidden">
 
-            {user ? (
+            {isLoggedin ? (
             <Link
               to="/dashboard"
               className="bg-gray-800 w-28 font-bold text-white px-5 py-2 text-sm rounded-full flex items-center gap-2 hover:bg-gray-900"
             >
+              <LayoutDashboard />
               Dashboard
             </Link>
-          ) : isRegistered ? (
+          )  : (
             <Link
               to="/login"
-              className="bg-blue-700 w-32 text-white px-5 py-2 text-sm rounded-full flex justify-center items-center gap-2 hover:bg-blue-800"
+              className="bg-green-700 w-28 text-white px-5 py-2 text-sm font-bold rounded-full flex justify-center items-center gap-2 hover:bg-green-800"
             >
+              <User2 className='w-4 h-4'/>
               Login
-            </Link>
-          ) : (
-            <Link
-              to="/register"
-              className="bg-green-700 w-32 text-white px-5 py-2 text-sm rounded-full flex justify-center items-center gap-2 hover:bg-green-800"
-            >
-              Register
             </Link>
           )}
 
@@ -298,39 +281,21 @@ function Navbar() {
   <div className="flex justify-start">
 
     {/* USER IS LOGGED IN */}
-    {user ? (
-      <>
-        {/* Show Dashboard only */}
-        <Link
-          to="/dashboard"
-          className="bg-gray-800 w-28 font-bold text-white px-5 py-2 text-sm rounded-full flex items-center gap-2 hover:bg-gray-900"
-        >
-          <Database className="w-4 h-4" /> Dashboard
-        </Link>
-      </>
-    ) : (
-      <>
-        {/* USER IS LOGGED OUT */}
-        {isRegistered === false ? (
-          // Not registered → show Register only
-          <Link
-            to="/register"
-            className="bg-green-700 w-32 text-white px-5 py-2 text-sm rounded-full flex justify-center items-center gap-2 hover:bg-green-800"
-          >
-            <User className="w-4 h-4" /> Register
-          </Link>
-        ) : (
-          // Logged out → show Login only
-          <Link
-            to="/login"
-            className="bg-blue-700 w-32 text-white px-5 py-2 text-sm rounded-full flex justify-center items-center gap-2 hover:bg-blue-800"
-          >
-            <User className="w-4 h-4" /> Login
-          </Link>
-        )}
-      </>
-    )}
-
+     {isLoggedin ? (
+            <Link
+              to="/dashboard"
+              className="bg-gray-800 w-28 font-bold text-white px-5 py-2 text-sm rounded-full flex items-center gap-2 hover:bg-gray-900"
+            >
+              Dashboard
+            </Link>
+          )  : (
+            <Link
+              to="/register"
+              className="bg-green-700 w-32 text-white px-5 py-2 text-sm rounded-full flex justify-center items-center gap-2 hover:bg-green-800"
+            >
+              Login
+            </Link>
+          )}
   </div>
 </div>
 

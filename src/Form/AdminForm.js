@@ -29,7 +29,7 @@ const texts = [
     }
   ]
 
-export default function RegisterPage() {
+export default function AdimForm() {
  
   const [menuOpen, setMenuOpen] = useState(false)
   const [ steps, setSteps] = useState(1)
@@ -333,7 +333,7 @@ const handleRegister = async () =>{
         if (role === "student") {
           window.location.href = "/dashboard";
         } else if (role === "admin") {
-          window.location.href = "/terms/form";
+          window.location.href = "/admin/form";
         }
       }
 

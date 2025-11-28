@@ -8,7 +8,27 @@ import knowledge from "./image/dua_beneficial.png";
 import ImageSlider from "./ImageSlider";
 import axios from "axios";
 import logos from './image/favicon.png'
+import TextSlider from "./TextSlider";
 
+
+const texts = [
+    {
+      id: 1,
+      title: "O Allah benefit me with what you taught me, and teach me that which will benefit me, and grant me knowledge which will benefit me",
+    },
+    {
+      id: 2,
+      title: "O Allah, I ask you for beneficiary knowledge, goodly provision and acceptable deeds",
+    },
+    {
+      id: 3,
+      title: "My Lord, truly I am in need of whatever good you bestow upon me",
+    },
+    {
+      id: 4,
+      title: "My Lord, Increase me in Knowledge",
+    }
+  ]
 
 export default function LoginPage() {
 
@@ -223,18 +243,16 @@ const resendOtp = async () => {
       )}
     </header>
 
-      <div className="wrapper flex flex-col items-center block sm:hidden">
-      <p className="text-2xl welcome font-bold text-black mt-5 mb-2">Kick Start Your Study</p>
-      <ul className="dynamic mt-1 mb-">
-        <ol><main>Islam Path of Knowledge</main></ol>
-      </ul>
-    </div>
-
       {/* Main Content - Login + Image */}
-      <div className="flex flex-1 flex-col items-center md:flex-row">
+
+       <div className=" text lg:hidden block pb-3 mt-5 md:translate-y-40 -md:mb-60 mx-auto w-80 md:w-[600px] md:px-8 shadow-2xl rounded-2xl">
+                <TextSlider texts={texts} />
+              </div>
+
+      <div className="flex flex-1 flex-col items-center lg:flex-row">
         {/* Left Section - Form */}
 <div className="flex flex-1 flex-col justify-center items-center p-6">
-        <div className="sm:w-full w-80 sm:max-w-md p-6 border border-blue-200 shadow-xl rounded-lg">
+        <div className="lg:w-full md:w-[600px] w-80 p-6 border border-blue-200 shadow-xl rounded-lg">
 
           {/* STEP 1 — Email + Password */}
           {steps === 1 && (
@@ -303,7 +321,7 @@ const resendOtp = async () => {
                 />
                 Remember me
               </label>
-              <Link to={'/forget_password'} className="text-blue-500 font-semibold hover:text-blue-700">
+              <Link to={'/forget-password'} className="text-blue-500 -translate-y-3 font-semibold hover:text-blue-700">
                 Forgot Password?
               </Link>
               </div>

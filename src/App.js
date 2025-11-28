@@ -8,6 +8,10 @@ import BuyPage from "./pages/BuyPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useState } from "react";
+import ForgotPassword from "./Form/ForgetPassword";
+import ResetPassword from "./Form/ResetPassword";
+import AdimForm from "./Form/AdminForm";
+import TermsForm from "./Form/TermsForm";
 
    
 function App() {
@@ -34,9 +38,22 @@ function App() {
           <HomePage />
       } />
 
-      {/* Buy */}
-      <Route path="/buy" element={
-          <BuyPage />
+      {/* Forget Password */}
+      <Route path="/forget-password" element={
+          <ForgotPassword />
+      } />
+
+      {/* Forget Password */}
+      <Route path="/reset-password" element={
+          <ResetPassword />
+      } />
+
+      <Route path="/admin/form" element={
+          <AdimForm />
+      } />
+
+      <Route path="/terms/form" element={
+          <TermsForm />
       } />
 
        <Route path="*" element={<NotFound />} />
