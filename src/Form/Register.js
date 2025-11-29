@@ -333,7 +333,7 @@ const handleRegister = async () =>{
         if (role === "student") {
           window.location.href = "/dashboard";
         } else if (role === "admin") {
-          window.location.href = "/terms/form";
+          window.location.href = "/terms-form";
         }
       }
 
@@ -719,7 +719,7 @@ const handleRegister = async () =>{
 
  {steps === 4 && (
         <>
-        <button
+        {/* <button
           className="px-4 py-2  text-black rounded opacity-60 "
           onClick={prevButton}
         >
@@ -727,7 +727,7 @@ const handleRegister = async () =>{
   <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75 3 12m0 0 3.75-3.75M3 12h18" />
 </svg>
 
-        </button>
+        </button> */}
           <h2 className="text-2xl font-bold text-black text-center">Verify your login</h2>
           <p className="text-gray-600 mt-2 text-center">Enter the 6-digit code sent to your email</p>
 

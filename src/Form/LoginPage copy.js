@@ -30,10 +30,6 @@ const texts = [
     }
   ]
 
-  axios.defaults.withCredentials = true;
-
-axios.defaults.baseURL = "http://127.0.0.1:8000";
-
 export default function LoginPage() {
 
  const [steps, setSteps] = useState(1);
@@ -55,13 +51,10 @@ export default function LoginPage() {
   const clearError = (field) => {
     setErrors(prev =>({...prev, [field]: ''}))
   }
-  
-  const getCsrf = async () => {
-  await axios.get("/sanctum/csrf-cookie");
-};
 
 
-const handleLoginNext = async () => { 
+
+  const handleLoginNext = async () => {
   const newErrors = {};
 
   if (!loginEmail) newErrors.email = "Email is required";
@@ -76,29 +69,26 @@ const handleLoginNext = async () => {
   setErrors({});
 
   try {
-    // STEP 0: GET CSRF COOKIE FIRST
-    await getCsrf();
-
     // STEP 1: Check email + password before OTP
-    const check = await axios.post("/api/login-check", {
+    const check = await axios.post("http://127.0.0.1:8000/api/login-check", {
       email: loginEmail,
       password: loginPassword,
     });
 
     // STEP 2: Send OTP
-    await axios.post("/api/login-otp", {
+    await axios.post("http://127.0.0.1:8000/api/login-otp", {
       email: loginEmail,
     });
 
-    // STEP 3: Switch to OTP screen
+    // STEP 3: Move to OTP screen
     setSteps(2);
-
   } catch (err) {
     let msg = "Something went wrong";
 
     if (err.response) {
       const serverMsg = err.response.data.message || "";
 
+      // Handle database/server connection errors
       if (
         serverMsg.includes("SQLSTATE") ||
         serverMsg.toLowerCase().includes("connection") ||
@@ -106,9 +96,11 @@ const handleLoginNext = async () => {
       ) {
         msg = "Server down, please try later";
       } else {
+        // Use backend message for other cases
         msg = serverMsg || msg;
       }
     } else if (err.request) {
+      // No response from server at all
       msg = "Server not reachable, please try later";
     }
 
@@ -118,10 +110,12 @@ const handleLoginNext = async () => {
   }
 };
 
+
 const resendOtp = async () => {
   try {
-    await axios.post("/api/login-otp", { email: loginEmail });
+    const response = await axios.post("http://127.0.0.1:8000/api/login-otp", { email: loginEmail });
 
+    // Start cooldown (e.g., 30 seconds)
     setResendTimer(30);
     const interval = setInterval(() => {
       setResendTimer(prev => {
@@ -138,47 +132,38 @@ const resendOtp = async () => {
   }
 };
 
-const verifyOtpLogin = async () => {
+  const verifyOtpLogin = async () => {
 
-  setLoading(true);
-  const otp = otpBoxes.join('');
+    setLoading(true)
+    const otp = otpBoxes.join('')
+    
+      if (otp.length !== 6){
+        setErrors({ otp: "Enter full 6-digit code" });
+      setLoading(false);
+      return;
+    }
 
-  if (otp.length !== 6){
-    setErrors({ otp: "Enter full 6-digit code" });
-    setLoading(false);
-    return;
-  }
+    try{
 
-  try {
-    // STEP 0: ALWAYS GET CSRF BEFORE LOGIN
-    await getCsrf();
-
-    // STEP 1: Verify OTP
-    await axios.post('/api/login-verify', {
+    await axios.post('http://127.0.0.1:8000/api/login-verify', {
       email: loginEmail,
       otp
-    });
+    })
 
-    // STEP 2: Login using Sanctum
-    const loginRes = await axios.post('/api/login', {
+    const loginRes = await axios.post('http://127.0.0.1:8000/api/login', {
       email: loginEmail,
       password: loginPassword,
       remember
-    });
-
-    localStorage.setItem("token", loginRes.data.token);
-
+    })
+    localStorage.setItem("token", loginRes.data.token)
     window.location.href = "/dashboard";
-
-  } catch (err) {
-    setErrors({ otp: "Invalid OTP. Try again" });
-  } finally {
-    setLoading(false);
+    } catch (err) {
+      setErrors({ otp: "Invalid OTP. Try again" });
+    } finally {
+      setLoading(false);
+    }   
   }
-};
 
-
-  
   const handleOtpChange = (value, index) => {
     if (!/^\d*$/.test(value)) return;
 

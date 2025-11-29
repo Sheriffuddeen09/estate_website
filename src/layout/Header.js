@@ -32,16 +32,8 @@ function Navbar() {
 }, []);
 
 
-//    <button
-//   onClick={() => {
-//     localStorage.removeItem("token");
-//     window.location.href = "/login"; // redirect
-//   }}
-//   className="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700"
-// >
-//   Logout
-// </button>
-// input
+   
+
 
     const handlemenu = () => {
       setMenu(!menu)
@@ -90,7 +82,7 @@ function Navbar() {
                 bg-gray-50 text-black '>
                   <div className='py-6 px-4 gap-3 grid grid-cols-1 text-sm mx-auto text-start '>
                     <Link to={'/add_student'} className='hover:text-gray-700 hover:bg-gray-200 px-3 py-1  text-xs rounded-lg hover:scale-105'>Add Student</Link>
-                    <Link to={'/arabic_mentor'} className='hover:text-gray-700 hover:bg-gray-200 px-3 py-1 text-xs rounded-lg hover:scale-105'>Get a Arabic Mentor</Link>
+                    <Link to={'/get-mentor'} className='hover:text-gray-700 hover:bg-gray-200 px-3 py-1 text-xs rounded-lg hover:scale-105'>Get a Arabic Mentor</Link>
                     
                     </div>
                   </div>
@@ -290,7 +282,7 @@ function Navbar() {
             </Link>
           )  : (
             <Link
-              to="/register"
+              to="/login"
               className="bg-green-700 w-32 text-white px-5 py-2 text-sm rounded-full flex justify-center items-center gap-2 hover:bg-green-800"
             >
               Login

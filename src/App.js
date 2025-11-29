@@ -10,8 +10,11 @@ import "react-toastify/dist/ReactToastify.css";
 import { useState } from "react";
 import ForgotPassword from "./Form/ForgetPassword";
 import ResetPassword from "./Form/ResetPassword";
-import AdimForm from "./Form/AdminForm";
-import TermsForm from "./Form/TermsForm";
+import TeacherOnboarding from "./Form/TeacherOnboarding";
+import AdminChoice from "./Form/AdminChoice";
+import GetMentor from "./pages/GetMentor";
+import CheckLogin from "./Form/CheckLogin";
+import DashboardLayout from "./Form/Dashboard";
 
    
 function App() {
@@ -48,12 +51,24 @@ function App() {
           <ResetPassword />
       } />
 
-      <Route path="/admin/form" element={
-          <AdimForm />
+      <Route path="/teacher-form" element={
+          <TeacherOnboarding />
       } />
 
-      <Route path="/terms/form" element={
-          <TermsForm />
+      <Route path="/terms-form" element={
+          <AdminChoice />
+      } />
+
+      <Route path="/get-mentor" element={
+          <GetMentor />
+      } />
+
+      <Route path="/user-status" element={
+          <CheckLogin />
+      } />
+
+      <Route path="/dashboard" element={
+          <DashboardLayout />
       } />
 
        <Route path="*" element={<NotFound />} />

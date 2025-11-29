@@ -204,12 +204,33 @@ main {
 .text{
   animation: colorChange 4s infinite alternate;
 }
+.texts{
+  animation: textChange 4s infinite alternate;
+}
+.files{
+  animation: filesChange 4s infinite alternate;
+}
 /* 🔵🟢🔴 Color Changing Animation */
+
 @keyframes colorChange {
   0% { background-color: #342d2d; }     /* Red */
   33% { background-color: #21333b; }    /* Blue */
   66% { background-color: #153426; }    /* Green */
   100% { background-color: #352d19; }   /* Yellow */
+}
+
+@keyframes textChange {
+  0% { background-color: #666161; }     /* Red */
+  33% { background-color: #3e5f6e; }    /* Blue */
+  66% { background-color: #2c5f47; }    /* Green */
+  100% { background-color: #6a592a; }   /* Yellow */
+}
+
+@keyframes filesChange {
+  0% { background-color: #ff4d4d; }     /* Red */
+  33% { background-color: #00b7ff; }    /* Blue */
+  66% { background-color: #00c46c; }    /* Green */
+  100% { background-color: #ffb400; }   /* Yellow */
 }
 
 /* Typing effect */
